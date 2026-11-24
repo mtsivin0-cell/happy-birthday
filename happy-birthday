@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday 💙</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #020206;
+      color: #a8c0ff;
+      font-family: 'Courier New', Courier, monospace;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 45px 20px;
+      overflow: hidden;
+    }
+    .typewriter-top {
+      direction: rtl;
+      font-size: 1.35rem;
+      font-weight: bold;
+      text-align: center;
+      color: #9cb4ff;
+      text-shadow: 0 0 12px rgba(80, 115, 255, 0.9);
+      min-height: 2em;
+      z-index: 2;
+    }
+    .typewriter-bottom {
+      direction: ltr;
+      font-size: 1.55rem;
+      font-weight: bold;
+      letter-spacing: 3px;
+      text-align: center;
+      color: #7b9cff;
+      text-shadow: 0 0 14px rgba(80, 115, 255, 1);
+      min-height: 2em;
+      z-index: 2;
+    }
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      background-color: #9cb4ff;
+      animation: blink 0.8s infinite;
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    canvas {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="typewriter-top" id="topText"></div>
+  <canvas id="flowerCanvas"></canvas>
+  <div class="typewriter-bottom" id="bottomText"></div>
+
+  <script>
+    const topMessage = "سوحقن للمسافات، هذه وردة لكِ";
+    const bottomMessage = "Happy Birthday!";
+
+    function typeWriter(elementId, text, speed, callback) {
+      const el = document.getElementById(elementId);
+      let i = 0;
+      el.innerHTML = '<span class="cursor">&nbsp;</span>';
+      
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          el.innerHTML = text.substring(0, i + 1) + '<span class="cursor">&nbsp;</span>';
+          i++;
+        } else {
+          clearInterval(interval);
+          if (callback) {
+            el.innerHTML = text;
+            setTimeout(callback, 500);
+          }
+        }
+      }, speed);
+    }
+
+    const canvas = document.getElementById("flowerCanvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = Math.min(window.innerWidth, 440);
+    canvas.height = Math.min(window.innerHeight * 0.72, 540);
+
+    const particles = [];
+    const cx = canvas.width / 2;
+    const baseY = canvas.height * 0.84;
+    const flowerY = canvas.height * 0.44;
+
+    const blueShades = ["#1e3cff", "#3b5bff", "#5975ff", "#2541b2"];
+    const purpleShades = ["#5a32fa", "#7b2cbf", "#4834d4"];
+
+    function addDot(x, y, size, color, delay, drift = 0.7) {
+      particles.push({
+        tx: x,
+        ty: y,
+        x: cx + (Math.random() - 0.5) * 15,
+        y: baseY,
+        size: size,
+        color: color,
+        alpha: 0,
+        delay: delay,
+        drift: drift,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+
+    // 1. الأرضية المتلألئة (مثل الفيديو)
+    for (let i = 0; i < 650; i++) {
+      const spreadX = (Math.random() - 0.5) * (canvas.width * 0.85);
+      const spreadY = (Math.random() - 0.5) * 28;
+      const col = Math.random() > 0.25 ? "#4a5588" : "#3b5bff";
+      addDot(cx + spreadX, baseY + spreadY, Math.random() * 1.5 + 0.4, col, Math.random() * 25, 0.3);
+    }
+
+    // 2. الهالة الدائرية المحيطة بالوردة
+    for (let i = 0; i < 280; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const r = 108 + (Math.random() - 0.5) * 10;
+      addDot(cx + Math.cos(a) * r, flowerY - 12 + Math.sin(a) * r, Math.random() * 1.3 + 0.4, "#5975ff", 35 + Math.random() * 45, 0.9);
+    }
+
+    // 3. الساق المنحنية قليلاً
+    for (let i = 0; i < 240; i++) {
+      const t = i / 240;
+      const sx = cx + Math.sin(t * Math.PI) * -6 + (Math.random() - 0.5) * 7;
+      const sy = baseY - t * (baseY - flowerY - 15);
+      addDot(sx, sy, Math.random() * 2.1 + 0.9, "#2948ff", t * 45, 0.4);
+    }
+
+    // 4. الأوراق الجانبية (ورقتين عاليمين وورقتين عاليسار مثل الفيديو)
+    function drawLeaf(startY, dir, scale) {
+      for (let i = 0; i < 190; i++) {
+        const u = Math.random();
+        const width = Math.sin(u * Math.PI) * 22 * scale;
+        const v = (Math.random() - 0.5) * width;
+        const lx = cx + dir * (u * 68 * scale);
+        const ly = startY - (u * 26 * scale) + v;
+        const col = blueShades[Math.floor(Math.random() * blueShades.length)];
+        addDot(lx, ly, Math.random() * 1.9 + 0.7, col, 30 + u * 40, 0.6);
+      }
+    }
+    drawLeaf(baseY - 45, -1, 0.95);
+    drawLeaf(baseY - 52, 1, 0.95);
+    drawLeaf(baseY - 95, -1, 0.8);
+    drawLeaf(baseY - 102, 1, 0.8);
+
+    // 5. بتلات زهرة اللوتس المتفتحة (طبق الأصل)
+    function drawPetal(angleDeg, length, width, isInner, delayOffset) {
+      const rad = (angleDeg * Math.PI) / 180;
+      const count = isInner ? 260 : 320;
+      for (let i = 0; i < count; i++) {
+        const u = Math.pow(Math.random(), 0.85); // توزيع كثيف نحو الأطراف
+        const profile = Math.sin(u * Math.PI);
+        const v = (Math.random() - 0.5) * width * profile;
+
+        // إحداثيات البتلة قبل التدوير
+        const localX = v;
+        const localY = -u * length;
+
+        // تدوير البتلة
+        const rotX = localX * Math.cos(rad) - localY * Math.sin(rad);
+        const rotY = localX * Math.sin(rad) + localY * Math.cos(rad);
+
+        let col;
+        if (isInner || u < 0.35) {
+          col = purpleShades[Math.floor(Math.random() * purpleShades.length)];
+        } else {
+          col = blueShades[Math.floor(Math.random() * blueShades.length)];
+        }
+
+        addDot(cx + rotX, flowerY + 12 + rotY, Math.random() * 2.2 + 0.8, col, delayOffset + u * 45, 0.65);
+      }
+    }
+
+    // رسم طبقات البتلات لتعطي نفس شكل اللوتس المتفتح
+    drawPetal(-62, 82, 34, false, 50); // بتلة يسار سفلية
+    drawPetal(62, 82, 34, false, 50);  // بتلة يمين سفلية
+    drawPetal(-36, 94, 38, false, 60); // بتلة يسار وسطى
+    drawPetal(36, 94, 38, false, 60);  // بتلة يمين وسطى
+    drawPetal(-14, 98, 36, true, 70);  // بتلة داخلية يسار
+    drawPetal(14, 98, 36, true, 70);   // بتلة داخلية يمين
+    drawPetal(0, 104, 34, true, 75);   // بتلة القلب الوسطى
+
+    let frame = 0;
+    function render() {
+      ctx.fillStyle = "rgba(2, 2, 6, 0.28)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      frame++;
+      for (let p of particles) {
+        if (frame > p.delay) {
+          // حركة انسيابية نحو المكان النهائي وتبقى ثابتة متفتحة للأبد
+          p.x += (p.tx - p.x) * 0.045;
+          p.y += (p.ty - p.y) * 0.045;
+          if (p.alpha < 0.92) p.alpha += 0.025;
+
+          p.phase += 0.035;
+          const dx = Math.cos(p.phase) * p.drift;
+          const dy = Math.sin(p.phase) * p.drift;
+
+          ctx.beginPath();
+          ctx.arc(p.x + dx, p.y + dy, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.alpha;
+          ctx.shadowBlur = 9;
+          ctx.shadowColor = p.color;
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+      requestAnimationFrame(render);
+    }
+
+    render();
+    setTimeout(() => {
+      typeWriter("topText", topMessage, 85, () => {
+        typeWriter("bottomText", bottomMessage, 95);
+      });
+    }, 900);
+  </script>
+</body>
+</html>
